@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 # This function loads a series of sprite images stored in a folder with a
-# consistent naming pattern: sprite_# or sprite_##. It returns a list of the images.
+# consistent naming pattern: sprite_# or sprite_##. It returns  the images.
 def load_sprite(sprite_folder_name, number_of_frames):
     frames = []
     padding = math.ceil(math.log(number_of_frames - 1, 10))
@@ -90,6 +90,17 @@ class SpritePreview(QMainWindow):
         
         frame.setLayout(layout)
         self.setCentralWidget(frame)
+
+        menubar = self.menuBar()
+        menu = menubar.addMenu("Menu")
+
+        pause_action = QAction("Pause", self)
+        pause_action.triggered.connect(self.pause_animation)
+        menu.addAction(pause_action)
+
+        exit_action = QAction("Exit", self)
+        exit_action.triggered.connect(self.close)
+        menu.addAction(exit_action)
         
         
     # You will need methods in the class to act as slots to connect to signals
@@ -108,6 +119,11 @@ class SpritePreview(QMainWindow):
     def next_frame(self):
         self.current_frame = (self.current_frame + 1) % len(self.frames)
         self.sprite_label.setPixmap(self.frames[self.current_frame])
+
+    def pause_animation(self):
+        self.timer.stop()
+        self.start_button.setText("Start")
+        self.is_animating = False
 
 
 def main():
