@@ -1,8 +1,8 @@
 import math
 
-from PyQt6.QtGui import *
-from PyQt6.QtWidgets import *
-from PyQt6.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 
 # This function loads a series of sprite images stored in a folder with a
 # consistent naming pattern: sprite_# or sprite_##. It returns a list of the images.
@@ -29,32 +29,57 @@ class SpritePreview(QMainWindow):
 
         # Make the GUI in the setupUI method
         self.setupUI()
-
+    def update_fps_label(self, value):
+            self.fps_value_label.setText(str(value))
 
     def setupUI(self):
         frame = QFrame()
-
-        # Layout
-        layout = QVBoxLayout()
         
-        # Label to display sprite
+        layout = QVBoxLayout()
+
+        # --- Existing sprite label ---
         self.sprite_label = QLabel()
         self.sprite_label.setAlignment(Qt.AlignCenter)
-
-        # Track current frame index
         self.current_frame = 0
-        
-        # Set initial pixmap
+
         if self.frames:
             self.sprite_label.setPixmap(self.frames[self.current_frame])
-            
-        # Add to layout
+
         layout.addWidget(self.sprite_label)
+
+        # --- FPS controls layout ---
+        controls_layout = QHBoxLayout()
+
+        # Label: "Frames per second"
+        fps_text_label = QLabel("Frames per second")
+
+        # Label: current FPS value
+        self.fps_value_label = QLabel("1")  # default
+
+        # Slider
+        self.fps_slider = QSlider(Qt.Horizontal)
+        self.fps_slider.setMinimum(1)
+        self.fps_slider.setMaximum(100)
+        self.fps_slider.setValue(1)
+
+    # Tick marks (research requirement)
+        self.fps_slider.setTickPosition(QSlider.TicksBelow)
+        self.fps_slider.setTickInterval(10)
+
+    # Connect slider to update label only (NOT animation start)
+        self.fps_slider.valueChanged.connect(self.update_fps_label)
+
+    # Add widgets to layout
+        controls_layout.addWidget(fps_text_label)
+        controls_layout.addWidget(self.fps_slider)
+        controls_layout.addWidget(self.fps_value_label)
+        
+        layout.addLayout(controls_layout)
+        
         frame.setLayout(layout)
-            
         self.setCentralWidget(frame)
-
-
+        
+        
     # You will need methods in the class to act as slots to connect to signals
 
 
