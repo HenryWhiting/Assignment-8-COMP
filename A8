@@ -23,6 +23,12 @@ class SpritePreview(QMainWindow):
         # This loads the provided sprite and would need to be changed for your own.
         self.num_frames = 21
         self.frames = load_sprite('spriteImages',self.num_frames)
+        # Timer for animation
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.next_frame)
+
+        # Track running state
+        self.is_animating = False
 
         # Add any other instance variables needed to track information as the program
         # runs here
@@ -31,6 +37,9 @@ class SpritePreview(QMainWindow):
         self.setupUI()
     def update_fps_label(self, value):
             self.fps_value_label.setText(str(value))
+            if self.is_animating:
+                interval = int(1000 / value)
+                self.timer.start(interval)
 
     def setupUI(self):
         frame = QFrame()
@@ -61,8 +70,11 @@ class SpritePreview(QMainWindow):
         self.fps_slider.setMinimum(1)
         self.fps_slider.setMaximum(100)
         self.fps_slider.setValue(1)
+# Start/Stop button
+        self.start_button = QPushButton("Start")
+        self.start_button.clicked.connect(self.toggle_animation)
 
-    # Tick marks (research requirement)
+        layout.addWidget(self.start_button)    # Tick marks (research requirement)
         self.fps_slider.setTickPosition(QSlider.TicksBelow)
         self.fps_slider.setTickInterval(10)
 
@@ -81,6 +93,21 @@ class SpritePreview(QMainWindow):
         
         
     # You will need methods in the class to act as slots to connect to signals
+    def toggle_animation(self):
+        if not self.is_animating:
+            fps = self.fps_slider.value()
+            interval = int(1000 / fps)
+            self.timer.start(interval)
+            self.start_button.setText("Stop")
+            self.is_animating = True
+        else:
+            self.timer.stop()
+            self.start_button.setText("Start")
+            self.is_animating = False
+
+    def next_frame(self):
+        self.current_frame = (self.current_frame + 1) % len(self.frames)
+        self.sprite_label.setPixmap(self.frames[self.current_frame])
 
 
 def main():
