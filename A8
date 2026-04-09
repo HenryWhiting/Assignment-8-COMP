@@ -45,10 +45,27 @@ class SpritePreview(QMainWindow):
         frame = QFrame()
         
         layout = QVBoxLayout()
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #f4f6f8;
+                font-family: Arial;
+            }
+        """)
 
         # --- Existing sprite label ---
         self.sprite_label = QLabel()
         self.sprite_label.setAlignment(Qt.AlignCenter)
+        self.sprite_label.setFixedSize(300, 300)
+        self.sprite_label.setStyleSheet("""
+            QLabel {
+                background-color: white;
+                border: 2px solid #cccccc;
+                border-radius: 10px;
+            }
+        """)
         self.current_frame = 0
 
         if self.frames:
@@ -64,15 +81,47 @@ class SpritePreview(QMainWindow):
 
         # Label: current FPS value
         self.fps_value_label = QLabel("1")  # default
+        self.fps_value_label.setStyleSheet("""
+            QLabel {
+                color: #2c3e50;
+                font-weight: bold;
+                font-size: 16px;
+                background-color: #ecf0f1;
+                padding: 4px;
+                border-radius: 5px;
+            }
+        """)
 
         # Slider
         self.fps_slider = QSlider(Qt.Horizontal)
         self.fps_slider.setMinimum(1)
         self.fps_slider.setMaximum(100)
         self.fps_slider.setValue(1)
+        self.fps_slider.setStyleSheet("""
+            QSlider::groove:horizontal {
+                height: 6px;
+                background: #dcdcdc;
+                border-radius: 3px;
+            }
+            QSlider::handle:horizontal {
+                background: #3498db;
+                width: 14px;
+                margin: -5px 0;
+                border-radius: 7px;
+            }
+        """)
 # Start/Stop button
         self.start_button = QPushButton("Start")
         self.start_button.clicked.connect(self.toggle_animation)
+        self.start_button.setStyleSheet("""
+            QPushButton {
+                background-color: #2ecc71;
+                color: white;
+                font-size: 16px;
+                border-radius: 8px;
+                padding: 8px;
+            }
+        """)
 
         layout.addWidget(self.start_button)    # Tick marks (research requirement)
         self.fps_slider.setTickPosition(QSlider.TicksBelow)
@@ -110,10 +159,28 @@ class SpritePreview(QMainWindow):
             interval = int(1000 / fps)
             self.timer.start(interval)
             self.start_button.setText("Stop")
+            self.start_button.setStyleSheet("""
+                QPushButton {
+                    background-color: #e74c3c;
+                    color: white;
+                    font-size: 16px;
+                    border-radius: 8px;
+                    padding: 8px;
+                }
+            """)
             self.is_animating = True
         else:
             self.timer.stop()
             self.start_button.setText("Start")
+            self.start_button.setStyleSheet("""
+                QPushButton {
+                    background-color: #2ecc71;
+                    color: white;
+                    font-size: 16px;
+                    border-radius: 8px;
+                    padding: 8px;
+                }
+            """)
             self.is_animating = False
 
     def next_frame(self):
@@ -123,6 +190,15 @@ class SpritePreview(QMainWindow):
     def pause_animation(self):
         self.timer.stop()
         self.start_button.setText("Start")
+        self.start_button.setStyleSheet("""
+            QPushButton {
+                background-color: #2ecc71;
+                color: white;
+                font-size: 16px;
+                border-radius: 8px;
+                padding: 8px;
+            }
+        """)
         self.is_animating = False
 
 
