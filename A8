@@ -1,3 +1,6 @@
+# Henry Whiting - Assignment 8 - COMP 1020
+# https://github.com/HenryWhiting/Assignment-8-COMP/blob/main/A8
+
 import math
 
 from PyQt5.QtGui import *
@@ -111,6 +114,8 @@ class SpritePreview(QMainWindow):
             }
         """)
 # Start/Stop button
+        button_layout = QHBoxLayout()
+
         self.start_button = QPushButton("Start")
         self.start_button.clicked.connect(self.toggle_animation)
         self.start_button.setStyleSheet("""
@@ -123,7 +128,22 @@ class SpritePreview(QMainWindow):
             }
         """)
 
-        layout.addWidget(self.start_button)    # Tick marks (research requirement)
+        self.exit_button = QPushButton("Exit")
+        self.exit_button.clicked.connect(self.exit_application)
+        self.exit_button.setStyleSheet("""
+            QPushButton {
+                background-color: #34495e;
+                color: white;
+                font-size: 16px;
+                border-radius: 8px;
+                padding: 8px;
+            }
+        """)
+
+        button_layout.addWidget(self.start_button)
+        button_layout.addWidget(self.exit_button)
+
+        layout.addLayout(button_layout)    # Tick marks (research requirement)
         self.fps_slider.setTickPosition(QSlider.TicksBelow)
         self.fps_slider.setTickInterval(10)
 
@@ -148,7 +168,7 @@ class SpritePreview(QMainWindow):
         menu.addAction(pause_action)
 
         exit_action = QAction("Exit", self)
-        exit_action.triggered.connect(self.close)
+        exit_action.triggered.connect(self.exit_application)
         menu.addAction(exit_action)
         
         
@@ -188,19 +208,22 @@ class SpritePreview(QMainWindow):
         self.sprite_label.setPixmap(self.frames[self.current_frame])
 
     def pause_animation(self):
-        self.timer.stop()
-        self.start_button.setText("Start")
-        self.start_button.setStyleSheet("""
-            QPushButton {
-                background-color: #2ecc71;
-                color: white;
-                font-size: 16px;
-                border-radius: 8px;
-                padding: 8px;
-            }
-        """)
-        self.is_animating = False
+        if self.is_animating:
+            self.timer.stop()
+            self.start_button.setText("Start")
+            self.start_button.setStyleSheet("""
+                QPushButton {
+                    background-color: #2ecc71;
+                    color: white;
+                    font-size: 16px;
+                    border-radius: 8px;
+                    padding: 8px;
+                }
+            """)
+            self.is_animating = False
 
+    def exit_application(self):
+        QApplication.quit()
 
 def main():
     app = QApplication([])
