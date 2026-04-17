@@ -7,47 +7,51 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
-# This function loads a series of sprite images stored in a folder with a
-# consistent naming pattern: sprite_# or sprite_##. It returns  the images.
+
 def load_sprite(sprite_folder_name, number_of_frames):
     frames = []
     padding = math.ceil(math.log(number_of_frames - 1, 10))
     for frame in range(number_of_frames):
-        folder_and_file_name = sprite_folder_name + "/sprite_" + str(frame).rjust(padding, '0') + ".png"
+        folder_and_file_name = (
+            sprite_folder_name
+            + "/sprite_"
+            + str(frame).rjust(padding, '0')
+            + ".png"
+        )
         frames.append(QPixmap(folder_and_file_name))
-
     return frames
+
 
 class SpritePreview(QMainWindow):
 
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Sprite Animation Preview")
-        # This loads the provided sprite and would need to be changed for your own.
+
         self.num_frames = 21
-        self.frames = load_sprite('spriteImages',self.num_frames)
-        # Timer for animation
+        self.frames = load_sprite('spriteImages', self.num_frames)
+
         self.timer = QTimer()
         self.timer.timeout.connect(self.next_frame)
 
-        # Track running state
         self.is_animating = False
+        self.current_frame = 0
 
-        # Add any other instance variables needed to track information as the program
-        # runs here
-
-        # Make the GUI in the setupUI method
         self.setupUI()
-    def update_fps_label(self, value):
-            self.fps_value_label.setText(str(value))
-            if self.is_animating:
-                interval = int(1000 / value)
-                self.timer.start(interval)
+
+    # fps + timer speed update
+    def update_fps(self, value):
+        self.fps_value_label.setText(str(value))
+
+        interval = int(1000 / value)
+
+        if self.is_animating:
+            self.timer.start(interval)
 
     def setupUI(self):
         frame = QFrame()
-        
         layout = QVBoxLayout()
+
         layout.setSpacing(15)
         layout.setContentsMargins(20, 20, 20, 20)
 
@@ -58,10 +62,11 @@ class SpritePreview(QMainWindow):
             }
         """)
 
-        # --- Existing sprite label ---
+        # sprite
         self.sprite_label = QLabel()
         self.sprite_label.setAlignment(Qt.AlignCenter)
         self.sprite_label.setFixedSize(300, 300)
+
         self.sprite_label.setStyleSheet("""
             QLabel {
                 background-color: white;
@@ -69,97 +74,98 @@ class SpritePreview(QMainWindow):
                 border-radius: 10px;
             }
         """)
-        self.current_frame = 0
 
         if self.frames:
             self.sprite_label.setPixmap(self.frames[self.current_frame])
 
-        layout.addWidget(self.sprite_label)
+        # timer
+        self.timer_label = QLabel("Frame: 1 / " + str(self.num_frames))
+        self.timer_label.setAlignment(Qt.AlignCenter)
 
-        # --- FPS controls layout ---
+        # fps
         controls_layout = QHBoxLayout()
 
-        # Label: "Frames per second"
         fps_text_label = QLabel("Frames per second")
 
-        # Label: current FPS value
-        self.fps_value_label = QLabel("1")  # default
-        self.fps_value_label.setStyleSheet("""
-            QLabel {
-                color: #2c3e50;
-                font-weight: bold;
-                font-size: 16px;
-                background-color: #ecf0f1;
-                padding: 4px;
-                border-radius: 5px;
-            }
-        """)
+        self.fps_value_label = QLabel("1")
 
-        # Slider
         self.fps_slider = QSlider(Qt.Horizontal)
         self.fps_slider.setMinimum(1)
         self.fps_slider.setMaximum(100)
         self.fps_slider.setValue(1)
-        self.fps_slider.setStyleSheet("""
-            QSlider::groove:horizontal {
-                height: 6px;
-                background: #dcdcdc;
-                border-radius: 3px;
-            }
-            QSlider::handle:horizontal {
-                background: #3498db;
-                width: 14px;
-                margin: -5px 0;
-                border-radius: 7px;
-            }
-        """)
-# Start/Stop button
-        button_layout = QHBoxLayout()
 
+        self.fps_slider.setTickPosition(QSlider.TicksBelow)
+        self.fps_slider.setTickInterval(10)
+
+        self.fps_slider.valueChanged.connect(self.update_fps)
+
+        controls_layout.addWidget(fps_text_label)
+        controls_layout.addWidget(self.fps_slider)
+        controls_layout.addWidget(self.fps_value_label)
+
+        # buttons
+        button_layout = QVBoxLayout()
+
+        # start and stop 
         self.start_button = QPushButton("Start")
         self.start_button.clicked.connect(self.toggle_animation)
+
         self.start_button.setStyleSheet("""
             QPushButton {
                 background-color: #2ecc71;
                 color: white;
                 font-size: 16px;
                 border-radius: 8px;
-                padding: 8px;
+                padding: 10px;
             }
         """)
 
+        button_layout.addWidget(self.start_button)
+
+        # Pause + Exit 
+        bottom_row = QHBoxLayout()
+
+        self.pause_button = QPushButton("Pause")
+        self.pause_button.clicked.connect(self.pause_animation)
+
         self.exit_button = QPushButton("Exit")
         self.exit_button.clicked.connect(self.exit_application)
-        self.exit_button.setStyleSheet("""
+
+        self.pause_button.setStyleSheet("""
             QPushButton {
-                background-color: #34495e;
+                background-color: #f39c12;
                 color: white;
-                font-size: 16px;
+                font-size: 14px;
                 border-radius: 8px;
                 padding: 8px;
             }
         """)
 
-        button_layout.addWidget(self.start_button)
-        button_layout.addWidget(self.exit_button)
+        self.exit_button.setStyleSheet("""
+            QPushButton {
+                background-color: #34495e;
+                color: white;
+                font-size: 14px;
+                border-radius: 8px;
+                padding: 8px;
+            }
+        """)
 
-        layout.addLayout(button_layout)    # Tick marks (research requirement)
-        self.fps_slider.setTickPosition(QSlider.TicksBelow)
-        self.fps_slider.setTickInterval(10)
+        bottom_row.addWidget(self.pause_button)
+        bottom_row.addWidget(self.exit_button)
 
-    # Connect slider to update label only (NOT animation start)
-        self.fps_slider.valueChanged.connect(self.update_fps_label)
+        button_layout.addLayout(bottom_row)
 
-    # Add widgets to layout
-        controls_layout.addWidget(fps_text_label)
-        controls_layout.addWidget(self.fps_slider)
-        controls_layout.addWidget(self.fps_value_label)
         
+        layout.addWidget(self.sprite_label)
+        layout.addWidget(self.timer_label)
         layout.addLayout(controls_layout)
-        
+        layout.addLayout(button_layout)
+
         frame.setLayout(layout)
         self.setCentralWidget(frame)
 
+        # Menu
         menubar = self.menuBar()
         menu = menubar.addMenu("Menu")
 
@@ -170,66 +176,47 @@ class SpritePreview(QMainWindow):
         exit_action = QAction("Exit", self)
         exit_action.triggered.connect(self.exit_application)
         menu.addAction(exit_action)
-        
-        
-    # You will need methods in the class to act as slots to connect to signals
+
+    
     def toggle_animation(self):
         if not self.is_animating:
             fps = self.fps_slider.value()
-            interval = int(1000 / fps)
-            self.timer.start(interval)
+            self.timer.start(int(1000 / fps))
+
             self.start_button.setText("Stop")
-            self.start_button.setStyleSheet("""
-                QPushButton {
-                    background-color: #e74c3c;
-                    color: white;
-                    font-size: 16px;
-                    border-radius: 8px;
-                    padding: 8px;
-                }
-            """)
             self.is_animating = True
+
         else:
             self.timer.stop()
+
             self.start_button.setText("Start")
-            self.start_button.setStyleSheet("""
-                QPushButton {
-                    background-color: #2ecc71;
-                    color: white;
-                    font-size: 16px;
-                    border-radius: 8px;
-                    padding: 8px;
-                }
-            """)
             self.is_animating = False
 
+    # Frame updater
     def next_frame(self):
         self.current_frame = (self.current_frame + 1) % len(self.frames)
+
         self.sprite_label.setPixmap(self.frames[self.current_frame])
 
+        # label update
+        self.timer_label.setText(
+            f"Frame: {self.current_frame + 1} / {len(self.frames)}"
+        )
+
+    # Pause
     def pause_animation(self):
         if self.is_animating:
             self.timer.stop()
             self.start_button.setText("Start")
-            self.start_button.setStyleSheet("""
-                QPushButton {
-                    background-color: #2ecc71;
-                    color: white;
-                    font-size: 16px;
-                    border-radius: 8px;
-                    padding: 8px;
-                }
-            """)
             self.is_animating = False
 
     def exit_application(self):
         QApplication.quit()
 
+
 def main():
     app = QApplication([])
-    # Create our custom application
     window = SpritePreview()
-    # And show it
     window.show()
     app.exec()
 
